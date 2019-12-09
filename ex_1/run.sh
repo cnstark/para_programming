@@ -8,6 +8,11 @@ elif [ $1 == "a2" ]
 then
 	echo "ex_1_a_2 running..."
 	mpirun -np 34 build/ex_1_a_2
+# ex_1_b
+elif [ $1 == "b" ]
+then
+	echo "ex_1_b running..."
+	mpirun -np 9 build/ex_1_b
 # ex_1_c
 elif [ $1 == "c" ]
 then
