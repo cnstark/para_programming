@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include <iomanip>
+#include "omp.h"
 #include "mpi_arg.hpp"
 
 #define VALUE(m, n, x, y) m[(x) * (n) + (y)]
@@ -26,6 +27,8 @@
 
 #define FILE_NAME "1.txt"
 #define NODE_NUM 50
+
+#define OMP_NUM 2
 
 double get_next_num(FILE *fp) {
     char ch;
@@ -115,13 +118,46 @@ void mpi_dijkstra(MPIArg arg) {
         int index = 0, index2;
         double num = 99999, num2;
 
-        /**步骤(3.1)**/
-        for (int j = 0; j < mynum; j++) {
-            if (dist[j] < num && bdist[j] == false) {
-                num = dist[j];
-                index = ep * arg.rank + j;
+        double omp_num[OMP_NUM];
+        int omp_index[OMP_NUM];
+
+        omp_set_num_threads(OMP_NUM);
+        #pragma omp parallel for
+        for (int a = 0; a < OMP_NUM; a++) {
+            int k = omp_get_thread_num();
+            omp_num[k] = 99999;
+            omp_index[k] = 0;
+            int et = (int)ceil(mynum / (double)OMP_NUM);
+            int my_omp_num = et;
+            if (k == OMP_NUM - 1) {
+                my_omp_num = mynum - (OMP_NUM - 1) * my_omp_num;
+            }
+            for (int j = 0; j < my_omp_num; j++) {
+                int p = j + k * et;
+                if (dist[p] < omp_num[k] && bdist[p] == false) {
+                    omp_num[k] = dist[p];
+                    omp_index[k] = ep * arg.rank + p;
+                }
             }
         }
+
+        num =  omp_num[0];
+        index = omp_index[0];
+        for (int k = 1; k < OMP_NUM; k++) {
+            if (omp_num[k] < num) {
+                num =  omp_num[k];
+                index = omp_index[k];
+            }
+        }
+
+
+        /**步骤(3.1)**/
+        // for (int j = 0; j < mynum; j++) {
+        //     if (dist[j] < num && bdist[j] == false) {
+        //         num = dist[j];
+        //         index = ep * arg.rank + j;
+        //     }
+        // }
 
         MPI_Barrier(arg.comm);
 

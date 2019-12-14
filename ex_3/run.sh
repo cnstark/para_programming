@@ -4,10 +4,10 @@ then
 	echo "ex_3_1 running..."
 	mpirun -np 3 build/ex_3_1
 # ex_1_a_2
-elif [ $1 == "a2" ]
+elif [ $1 == "1omp" ]
 then
-	echo "ex_1_a_2 running..."
-	mpirun -np 34 build/ex_1_a_2
+	echo "ex_3_1_omp running..."
+	mpirun -np 3 build/ex_3_1_omp
 # ex_1_b
 elif [ $1 == "b" ]
 then
