@@ -2,6 +2,7 @@
 #include <cstring>
 #include <iostream>
 #include <cmath>
+#include <ctime>
 #include <iomanip>
 #include "omp.h"
 #include "mpi_arg.hpp"
@@ -28,7 +29,7 @@
 #define FILE_NAME "1.txt"
 #define NODE_NUM 50
 
-#define OMP_NUM 2
+#define OMP_NUM 3
 
 double get_next_num(FILE *fp) {
     char ch;
@@ -51,7 +52,7 @@ double get_next_num(FILE *fp) {
     }
 }
 
-void mpi_dijkstra(MPIArg arg) {
+void mpi_omp_dijkstra(MPIArg arg) {
     int n, s;
     double *matrix;
     double *part;
@@ -169,8 +170,8 @@ void mpi_dijkstra(MPIArg arg) {
                     calnum = calnum / 2;
                     if((arg.rank + 1) > calnum) {
                         if (arg.rank + 1 - calnum <= calnum) {
-                        MPI_Send(&index, 1, MPI_INT, arg.rank - calnum, arg.rank - calnum, arg.comm);
-                        MPI_Send(&num, 1, MPI_DOUBLE, arg.rank - calnum, arg.rank - calnum, arg.comm);
+                            MPI_Send(&index, 1, MPI_INT, arg.rank - calnum, arg.rank - calnum, arg.comm);
+                            MPI_Send(&num, 1, MPI_DOUBLE, arg.rank - calnum, arg.rank - calnum, arg.comm);
                         }
                     } else {
                         MPI_Recv(&index2, 1, MPI_INT, arg.rank + calnum, arg.rank, arg.comm, &status);
@@ -241,7 +242,10 @@ void mpi_dijkstra(MPIArg arg) {
 int main(int argc, char *argv[]) {
     MPIArg mpi_arg = MPIArg(&argc, &argv);
 
-    mpi_dijkstra(mpi_arg);
+    clock_t start = clock();
+    mpi_omp_dijkstra(mpi_arg);
+    clock_t end = clock();
+    std::cout << "time: " << end - start << std::endl;
 
     MPI_Finalize();
     return 0;

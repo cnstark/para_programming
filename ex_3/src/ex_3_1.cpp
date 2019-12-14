@@ -2,6 +2,7 @@
 #include <cstring>
 #include <iostream>
 #include <cmath>
+#include <ctime>
 #include <iomanip>
 #include "mpi_arg.hpp"
 
@@ -133,8 +134,8 @@ void mpi_dijkstra(MPIArg arg) {
                     calnum = calnum / 2;
                     if((arg.rank + 1) > calnum) {
                         if (arg.rank + 1 - calnum <= calnum) {
-                        MPI_Send(&index, 1, MPI_INT, arg.rank - calnum, arg.rank - calnum, arg.comm);
-                        MPI_Send(&num, 1, MPI_DOUBLE, arg.rank - calnum, arg.rank - calnum, arg.comm);
+                            MPI_Send(&index, 1, MPI_INT, arg.rank - calnum, arg.rank - calnum, arg.comm);
+                            MPI_Send(&num, 1, MPI_DOUBLE, arg.rank - calnum, arg.rank - calnum, arg.comm);
                         }
                     } else {
                         MPI_Recv(&index2, 1, MPI_INT, arg.rank + calnum, arg.rank, arg.comm, &status);
@@ -205,7 +206,10 @@ void mpi_dijkstra(MPIArg arg) {
 int main(int argc, char *argv[]) {
     MPIArg mpi_arg = MPIArg(&argc, &argv);
 
+    clock_t start = clock();
     mpi_dijkstra(mpi_arg);
+    clock_t end = clock();
+    std::cout << "time: " << end - start << std::endl;
 
     MPI_Finalize();
     return 0;
